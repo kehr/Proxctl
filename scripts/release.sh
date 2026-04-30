@@ -76,8 +76,11 @@ fi
 current_branch="$(git branch --show-current)"
 [[ "$current_branch" == "$branch" ]] || fail "must release from $branch, current branch is $current_branch"
 
-if [[ -n "$(git status --porcelain)" ]]; then
-  fail "working tree is not clean; commit or stash changes first"
+if [[ -n "$(git status --porcelain --untracked-files=no)" ]]; then
+  fail "tracked working tree changes exist; commit or stash them first"
+fi
+if git status --porcelain --untracked-files=normal | grep -q '^?? '; then
+  echo "release: warning: untracked files exist and will not be included in the release commit" >&2
 fi
 
 git fetch "$remote" --tags
