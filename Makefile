@@ -36,6 +36,7 @@ docs:
 	git diff --exit-code docs/commands
 
 docs-site:
+	./scripts/docs-metadata.sh
 	npm --prefix docs ci
 	npm --prefix docs run build
 	npm --prefix docs audit --omit=dev

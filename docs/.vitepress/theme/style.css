@@ -25,3 +25,29 @@
 .vp-doc code {
   font-variant-ligatures: none;
 }
+
+.proxctl-version {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  margin: 12px 0 28px;
+  padding: 7px 10px;
+  border: 1px solid var(--vp-c-divider);
+  border-radius: 8px;
+  background: var(--vp-c-bg-soft);
+  font-size: 13px;
+}
+
+.proxctl-version__label,
+.proxctl-version__commit {
+  color: var(--vp-c-text-2);
+}
+
+.proxctl-version__value {
+  color: var(--vp-c-brand-1);
+  font-weight: 700;
+}
+
+.proxctl-examples h3 {
+  margin-top: 24px;
+}

@@ -3,8 +3,8 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "vitepress --host 127.0.0.1",
-    "build": "vitepress build",
+    "dev": "../scripts/docs-metadata.sh && vitepress --host 127.0.0.1",
+    "build": "../scripts/docs-metadata.sh && vitepress build",
     "preview": "vitepress preview --host 127.0.0.1"
   },
   "devDependencies": {

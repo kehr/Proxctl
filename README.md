@@ -25,14 +25,14 @@ curl -fsSL https://github.com/kehr/Proxctl/releases/latest/download/install.sh |
 Install a specific version:
 
 ```bash
-curl -fsSL https://github.com/kehr/Proxctl/releases/latest/download/install.sh | PROXCTL_VERSION=v0.2.0 sh
+curl -fsSL https://github.com/kehr/Proxctl/releases/latest/download/install.sh | PROXCTL_VERSION="$(cat VERSION)" sh
 ```
 
 Download the archive for your platform from GitHub Releases, then install the binary:
 
 ```bash
-tar -xzf proxctl-v0.2.0-linux-amd64.tar.gz
-sudo install -m 0755 proxctl-v0.2.0-linux-amd64/proxctl /usr/local/bin/proxctl
+tar -xzf proxctl-<version>-linux-amd64.tar.gz
+sudo install -m 0755 proxctl-<version>-linux-amd64/proxctl /usr/local/bin/proxctl
 ```
 
 Verify:

@@ -27,6 +27,8 @@ features:
     details: Download platform-specific archives with consistent names and checksum verification.
 ---
 
+<LatestVersion />
+
 ## Install
 
 ```bash

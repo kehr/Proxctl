@@ -1,4 +1,10 @@
 import { defineConfig } from 'vitepress'
+import { readFileSync } from 'node:fs'
+import { dirname, resolve } from 'node:path'
+import { fileURLToPath } from 'node:url'
+
+const root = resolve(dirname(fileURLToPath(import.meta.url)), '../..')
+const proxctlVersion = readFileSync(resolve(root, 'VERSION'), 'utf8').trim()
 
 export default defineConfig({
   title: 'Proxctl',
@@ -23,7 +29,8 @@ export default defineConfig({
       { text: 'Guide', link: '/guide/getting-started' },
       { text: 'Operations', link: '/operations/backup-restore' },
       { text: 'Reference', link: '/reference/configuration' },
-      { text: 'Development', link: '/development/architecture' }
+      { text: 'Development', link: '/development/architecture' },
+      { text: proxctlVersion, link: '/reference/release-notes' }
     ],
     sidebar: [
       {
@@ -51,6 +58,7 @@ export default defineConfig({
           { text: 'Configuration', link: '/reference/configuration' },
           { text: 'Artifacts', link: '/reference/artifacts' },
           { text: 'Release Process', link: '/reference/release' },
+          { text: 'Release Notes', link: '/reference/release-notes' },
           { text: 'Command Reference', link: '/commands/proxctl' }
         ]
       },

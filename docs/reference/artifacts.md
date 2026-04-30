@@ -2,14 +2,9 @@
 
 Release artifacts use hyphen-separated names:
 
-```text
-proxctl-v0.2.0-linux-amd64.tar.gz
-proxctl-v0.2.0-linux-arm64.tar.gz
-proxctl-v0.2.0-darwin-amd64.tar.gz
-proxctl-v0.2.0-darwin-arm64.tar.gz
-proxctl-v0.2.0-windows-amd64.zip
-checksums.txt
-```
+<LatestVersion />
+
+<ArtifactNames />
 
 Snapshot artifacts use:
 

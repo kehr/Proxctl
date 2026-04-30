@@ -80,6 +80,7 @@ proxctl version
 - \`proxctl-${version}-darwin-arm64.tar.gz\`
 - \`proxctl-${version}-windows-amd64.zip\`
 - \`checksums.txt\`
+- \`install.sh\`
 
 ## Verify Checksums
 
