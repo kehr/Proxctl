@@ -1,0 +1,9 @@
+[Unit]
+Description=Proxctl boot health check
+After=network-online.target xray.service
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/bin/proxctl boot-check --record
+

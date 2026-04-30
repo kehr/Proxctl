@@ -1,0 +1,10 @@
+[Unit]
+Description=Run Proxctl boot health check after boot
+
+[Timer]
+OnBootSec=90s
+Persistent=false
+
+[Install]
+WantedBy=timers.target
+

@@ -30,3 +30,9 @@ go.work.sum
 # Editor/IDE
 # .idea/
 # .vscode/
+
+# Proxctl local build output
+build/
+dist/
+*.tmp
+.DS_Store

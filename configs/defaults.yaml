@@ -1,0 +1,19 @@
+provider: xray
+xray:
+  config_path: /usr/local/etc/xray/config.json
+  service: xray
+  binary: xray
+  default_protocol: vless-reality
+  default_port: 443
+  default_listen: 0.0.0.0
+  default_reality_dest: www.microsoft.com:443
+  default_reality_server_name: www.microsoft.com
+  default_log_level: warning
+  default_access_log: false
+operations:
+  state_dir: /var/lib/proxctl
+  require_tokens_for_dangerous_actions: true
+  enable_boot_check_by_default: true
+  enable_firewall_by_default: false
+  ssh_harden_by_default: false
+
