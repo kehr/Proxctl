@@ -73,9 +73,9 @@ jobs:
           draft: false
           prerelease: ${{ contains(steps.version.outputs.version, '-') }}
           files: |
-            dist/proxctl_${{ steps.version.outputs.version }}_linux_amd64.tar.gz
-            dist/proxctl_${{ steps.version.outputs.version }}_linux_arm64.tar.gz
-            dist/proxctl_${{ steps.version.outputs.version }}_darwin_amd64.tar.gz
-            dist/proxctl_${{ steps.version.outputs.version }}_darwin_arm64.tar.gz
-            dist/proxctl_${{ steps.version.outputs.version }}_windows_amd64.zip
+            dist/proxctl-${{ steps.version.outputs.version }}-linux-amd64.tar.gz
+            dist/proxctl-${{ steps.version.outputs.version }}-linux-arm64.tar.gz
+            dist/proxctl-${{ steps.version.outputs.version }}-darwin-amd64.tar.gz
+            dist/proxctl-${{ steps.version.outputs.version }}-darwin-arm64.tar.gz
+            dist/proxctl-${{ steps.version.outputs.version }}-windows-amd64.zip
             dist/checksums.txt

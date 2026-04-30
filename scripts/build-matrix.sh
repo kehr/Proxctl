@@ -30,7 +30,7 @@ targets=(
 
 for target in "${targets[@]}"; do
   read -r goos goarch <<<"$target"
-  name="proxctl_${name_version}_${goos}_${goarch}"
+  name="proxctl-${name_version}-${goos}-${goarch}"
   bin="proxctl"
   if [[ "$goos" == "windows" ]]; then
     bin="proxctl.exe"
@@ -48,9 +48,9 @@ for target in "${targets[@]}"; do
   rm -rf "$work"
 done
 
-(cd dist && shasum -a 256 proxctl_${name_version}_* > "checksums.txt")
+(cd dist && shasum -a 256 proxctl-${name_version}-* > "checksums.txt")
 
 if [[ "$mode" == "snapshot" ]]; then
   mkdir -p build
-  cp dist/proxctl_${name_version}_linux_amd64.tar.gz build/ 2>/dev/null || true
+  cp dist/proxctl-${name_version}-linux-amd64.tar.gz build/ 2>/dev/null || true
 fi
