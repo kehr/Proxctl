@@ -68,7 +68,7 @@ LISTEN 0 4096 [::]:443 [::]:* users:(("xray",pid=2,fd=3))`
 }
 
 func TestRealityPublicKeyDerivesFromPrivateKey(t *testing.T) {
-	runner := fakeRunner{stdout: "private key: server-private-key\npublic key: derived-public-key\n"}
+	runner := fakeRunner{stdout: "PrivateKey: server-private-key\nPassword (PublicKey): derived-public-key\nHash32: ignored\n"}
 	pub, err := RealityPublicKey(context.Background(), runner, "xray", "server-private-key")
 	if err != nil {
 		t.Fatal(err)

@@ -51,8 +51,8 @@ func (g SystemGenerator) RealityKeyPair() (string, string, error) {
 	}
 	var priv, pub string
 	for _, line := range strings.Split(res.Stdout, "\n") {
-		priv = firstNonEmpty(priv, valueAfterLabel(line, "private key:"))
-		pub = firstNonEmpty(pub, valueAfterLabel(line, "public key:"))
+		priv = firstNonEmpty(priv, valueAfterLabels(line, "private key:", "privatekey:"))
+		pub = firstNonEmpty(pub, valueAfterLabels(line, "public key:", "publickey:", "password:", "password (publickey):"))
 	}
 	if priv == "" || pub == "" {
 		return "", "", fmt.Errorf("could not parse x25519 output")
@@ -76,11 +76,20 @@ func RealityPublicKey(ctx context.Context, runner command.Runner, xrayBin, priva
 		return "", fmt.Errorf("xray x25519 failed: %s", res.Stderr)
 	}
 	for _, line := range strings.Split(res.Stdout, "\n") {
-		if pub := valueAfterLabel(line, "public key:"); pub != "" {
+		if pub := valueAfterLabels(line, "public key:", "publickey:", "password:", "password (publickey):"); pub != "" {
 			return pub, nil
 		}
 	}
 	return "", fmt.Errorf("could not parse x25519 public key output")
+}
+
+func valueAfterLabels(line string, labels ...string) string {
+	for _, label := range labels {
+		if value := valueAfterLabel(line, label); value != "" {
+			return value
+		}
+	}
+	return ""
 }
 
 func valueAfterLabel(line, label string) string {
