@@ -2,10 +2,10 @@
 
 This page is generated at documentation build time from the repository `VERSION` file.
 
-- Current version: `v0.2.2`
-- Release: [GitHub v0.2.2](https://github.com/kehr/Proxctl/releases/tag/v0.2.2)
+- Current version: `v0.2.3`
+- Release: [GitHub v0.2.3](https://github.com/kehr/Proxctl/releases/tag/v0.2.3)
 
-## Proxctl v0.2.2
+## Proxctl v0.2.3
 
 Proxctl is a lightweight proxy deployment and operations CLI. This release provides versioned multi-platform binaries and operational tooling for Xray-based VPS nodes.
 
@@ -21,8 +21,26 @@ Documentation: https://proxctl.kaixuan.ai
 
 ## Changes
 
+- feat: auto-detect client export defaults (9933af3)
+- fix: keep docs version metadata stable (548572b)
+- ci: use node 24 for docs actions (38d7e69)
+- docs: generate versioned release metadata (ba4e798)
 - chore: release v0.2.2 (1101a85)
 - fix: apply ssh hardening before vendor drop-ins (da8bbbe)
+- fix: publish installer as release asset (edb66f1)
+- fix: preserve installer archive path (aa7ebfb)
+- chore: release v0.2.1 (9188a03)
+- docs: add repository agent guidelines (7dd89fc)
+- fix: allow untracked files during release (c6b991d)
+- chore: add make release workflow (10a93e3)
+- fix: harden operational config changes (fa69604)
+- docs: add VitePress documentation site (02d89c8)
+- chore: move installer into scripts (617a218)
+- feat: add one-line installer (4b50051)
+- ci: generate structured release notes (0370251)
+- ci: release only on version tags (2cc7ffb)
+- docs: split development guide from readme (acf278b)
+- ci: use hyphenated artifact names (7a64ebf)
 
 ## Install
 
@@ -35,28 +53,28 @@ curl -fsSL https://github.com/kehr/Proxctl/releases/latest/download/install.sh |
 Linux amd64:
 
 ```bash
-curl -LO https://github.com/kehr/Proxctl/releases/download/v0.2.2/proxctl-v0.2.2-linux-amd64.tar.gz
-tar -xzf proxctl-v0.2.2-linux-amd64.tar.gz
-sudo install -m 0755 proxctl-v0.2.2-linux-amd64/proxctl /usr/local/bin/proxctl
+curl -LO https://github.com/kehr/Proxctl/releases/download/v0.2.3/proxctl-v0.2.3-linux-amd64.tar.gz
+tar -xzf proxctl-v0.2.3-linux-amd64.tar.gz
+sudo install -m 0755 proxctl-v0.2.3-linux-amd64/proxctl /usr/local/bin/proxctl
 proxctl version
 ```
 
 macOS arm64:
 
 ```bash
-curl -LO https://github.com/kehr/Proxctl/releases/download/v0.2.2/proxctl-v0.2.2-darwin-arm64.tar.gz
-tar -xzf proxctl-v0.2.2-darwin-arm64.tar.gz
-sudo install -m 0755 proxctl-v0.2.2-darwin-arm64/proxctl /usr/local/bin/proxctl
+curl -LO https://github.com/kehr/Proxctl/releases/download/v0.2.3/proxctl-v0.2.3-darwin-arm64.tar.gz
+tar -xzf proxctl-v0.2.3-darwin-arm64.tar.gz
+sudo install -m 0755 proxctl-v0.2.3-darwin-arm64/proxctl /usr/local/bin/proxctl
 proxctl version
 ```
 
 ## Assets
 
-- `proxctl-v0.2.2-linux-amd64.tar.gz`
-- `proxctl-v0.2.2-linux-arm64.tar.gz`
-- `proxctl-v0.2.2-darwin-amd64.tar.gz`
-- `proxctl-v0.2.2-darwin-arm64.tar.gz`
-- `proxctl-v0.2.2-windows-amd64.zip`
+- `proxctl-v0.2.3-linux-amd64.tar.gz`
+- `proxctl-v0.2.3-linux-arm64.tar.gz`
+- `proxctl-v0.2.3-darwin-amd64.tar.gz`
+- `proxctl-v0.2.3-darwin-arm64.tar.gz`
+- `proxctl-v0.2.3-windows-amd64.zip`
 - `checksums.txt`
 - `install.sh`
 
@@ -68,4 +86,4 @@ shasum -a 256 -c checksums.txt
 
 ## Full Changelog
 
-https://github.com/kehr/Proxctl/compare/v0.2.1...v0.2.2
+https://github.com/kehr/Proxctl/compare/v0.2.2...v0.2.3
