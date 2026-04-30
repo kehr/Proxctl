@@ -19,7 +19,7 @@ Proxctl is a production-oriented local control plane for proxy services on small
 - `src/internal/state`: backup, manifest, state, and restore helpers.
 - `src/internal/system`: OS, SSH, firewall, and update checks.
 - `src/internal/command`: external command execution boundary.
-- `docs`: operator and implementation documentation.
+- `docs`: VitePress documentation site source.
 - `configs`: default production configuration examples.
 - `scripts`: build and deployment helpers.
 

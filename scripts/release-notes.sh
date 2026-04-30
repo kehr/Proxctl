@@ -20,6 +20,8 @@ cat <<EOF
 
 Proxctl is a lightweight proxy deployment and operations CLI. This release provides versioned multi-platform binaries and operational tooling for Xray-based VPS nodes.
 
+Documentation: https://proxctl.kaixuan.ai
+
 ## Highlights
 
 - Xray lifecycle commands for install, init, adopt, status, audit, health, and doctor workflows.

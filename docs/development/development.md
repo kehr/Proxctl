@@ -103,3 +103,36 @@ Dry-run locally:
 ```bash
 PROXCTL_DRY_RUN=1 ./scripts/install.sh
 ```
+
+## Documentation Site
+
+The documentation site is built with VitePress.
+
+Local development:
+
+```bash
+cd docs
+npm install
+npm run dev
+```
+
+Production build:
+
+```bash
+cd docs
+npm run build
+```
+
+The site is deployed to GitHub Pages by `.github/workflows/docs.yml`.
+
+Custom domain:
+
+```text
+proxctl.kaixuan.ai
+```
+
+DNS should point the `proxctl` CNAME record to:
+
+```text
+kehr.github.io
+```

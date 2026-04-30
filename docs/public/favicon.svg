@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="Proxctl">
+  <rect width="64" height="64" rx="14" fill="#0f172a"/>
+  <path d="M17 33c0-8.3 6.7-15 15-15h16v8H32a7 7 0 0 0 0 14h16v8H32c-8.3 0-15-6.7-15-15Z" fill="#14b8a6"/>
+  <path d="M16 18h10v8H16v22h-8V26c0-4.4 3.6-8 8-8Z" fill="#e2e8f0"/>
+</svg>

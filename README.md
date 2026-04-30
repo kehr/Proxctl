@@ -70,7 +70,8 @@ sudo proxctl apply rotate xray all
 
 ## Documentation
 
-- [Operations guide](docs/operations.md)
-- [Architecture](docs/architecture.md)
-- [Development guide](docs/development.md)
+- Documentation site: <https://proxctl.kaixuan.ai>
+- [Getting started](docs/guide/getting-started.md)
+- [Operations](docs/operations/backup-restore.md)
+- [Development guide](docs/development/development.md)
 - [Command reference](docs/commands/proxctl.md)

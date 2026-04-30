@@ -36,3 +36,8 @@ build/
 dist/
 *.tmp
 .DS_Store
+
+# Docs local dependencies and build output
+docs/node_modules/
+docs/.vitepress/cache/
+docs/.vitepress/dist/
