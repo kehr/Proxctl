@@ -61,7 +61,6 @@ CI runs on push and pull requests:
 - local build
 - smoke tests
 - command documentation consistency check
-- snapshot artifact upload on `main`
 
 Release builds run on `v*` tags and upload:
 
