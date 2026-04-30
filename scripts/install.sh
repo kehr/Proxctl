@@ -64,13 +64,13 @@ latest_version() {
 }
 
 sha256_check() {
-  checksums="$1"
-  archive="$2"
-  base="$(basename "$archive")"
+  checksum_file="$1"
+  archive_file="$2"
+  archive_base="$(basename "$archive_file")"
   if command -v sha256sum >/dev/null 2>&1; then
-    (cd "$(dirname "$archive")" && grep "  ${base}$" "$checksums" | sha256sum -c -)
+    (cd "$(dirname "$archive_file")" && grep "  ${archive_base}$" "$checksum_file" | sha256sum -c -)
   elif command -v shasum >/dev/null 2>&1; then
-    (cd "$(dirname "$archive")" && grep "  ${base}$" "$checksums" | shasum -a 256 -c -)
+    (cd "$(dirname "$archive_file")" && grep "  ${archive_base}$" "$checksum_file" | shasum -a 256 -c -)
   else
     fail "sha256sum or shasum is required"
   fi
