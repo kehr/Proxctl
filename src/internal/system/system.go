@@ -2,8 +2,10 @@ package system
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"os"
+	"sort"
 	"strings"
 
 	"github.com/kehr/proxctl/src/internal/command"
@@ -87,6 +89,9 @@ func PlanSSHHarden(ctx context.Context, r command.Runner, p *output.Printer) {
 
 func ApplySSHHarden(ctx context.Context, r command.Runner) error {
 	content := "PasswordAuthentication no\nPermitRootLogin prohibit-password\nKbdInteractiveAuthentication no\nX11Forwarding no\nMaxAuthTries 3\n"
+	if err := os.MkdirAll("/etc/ssh/sshd_config.d", 0700); err != nil {
+		return err
+	}
 	if err := os.WriteFile("/etc/ssh/sshd_config.d/90-proxctl-hardening.conf", []byte(content), 0600); err != nil {
 		return err
 	}
@@ -101,7 +106,8 @@ func ApplySSHHarden(ctx context.Context, r command.Runner) error {
 
 func AuditFirewall(ctx context.Context, r command.Runner, p *output.Printer) {
 	if r.LookPath("firewall-cmd") {
-		p.Info("firewalld: %s", strings.TrimSpace(r.Run(ctx, "systemctl", "is-active", "firewalld").Stdout+r.Run(ctx, "systemctl", "is-active", "firewalld").Stderr))
+		res := r.Run(ctx, "systemctl", "is-active", "firewalld")
+		p.Info("firewalld: %s", strings.TrimSpace(res.Stdout+res.Stderr))
 		out := r.Run(ctx, "firewall-cmd", "--list-all").Stdout
 		if out != "" {
 			fmt.Fprint(p.Out, out)
@@ -124,19 +130,67 @@ func PlanFirewall(ctx context.Context, r command.Runner, p *output.Printer) {
 }
 
 func ApplyFirewall(ctx context.Context, r command.Runner, configPath string) error {
-	if res := r.Run(ctx, "firewall-cmd", "--permanent", "--add-service=ssh"); res.Code != 0 {
+	ports, err := proxyPorts(configPath)
+	if err != nil {
+		return err
+	}
+	firewallCmd := "firewall-cmd"
+	permanentArgs := []string{"--permanent"}
+	active := r.Run(ctx, "systemctl", "is-active", "--quiet", "firewalld").Code == 0
+	if !active {
+		if !r.LookPath("firewall-offline-cmd") {
+			return fmt.Errorf("firewalld is inactive and firewall-offline-cmd is not available")
+		}
+		firewallCmd = "firewall-offline-cmd"
+		permanentArgs = nil
+	}
+	if res := r.Run(ctx, firewallCmd, append(permanentArgs, "--add-service=ssh")...); res.Code != 0 {
 		return fmt.Errorf("allow ssh failed: %s", res.Stderr)
 	}
-	if res := r.Run(ctx, "firewall-cmd", "--permanent", "--add-port=443/tcp"); res.Code != 0 {
-		return fmt.Errorf("allow 443 failed: %s", res.Stderr)
+	for _, port := range ports {
+		if res := r.Run(ctx, firewallCmd, append(permanentArgs, fmt.Sprintf("--add-port=%d/tcp", port))...); res.Code != 0 {
+			return fmt.Errorf("allow %d/tcp failed: %s", port, res.Stderr)
+		}
 	}
 	if res := r.Run(ctx, "systemctl", "enable", "--now", "firewalld"); res.Code != 0 {
 		return fmt.Errorf("enable firewalld failed: %s", res.Stderr)
 	}
-	if res := r.Run(ctx, "firewall-cmd", "--reload"); res.Code != 0 {
-		return fmt.Errorf("reload firewalld failed: %s", res.Stderr)
+	if active {
+		if res := r.Run(ctx, "firewall-cmd", "--reload"); res.Code != 0 {
+			return fmt.Errorf("reload firewalld failed: %s", res.Stderr)
+		}
 	}
 	return nil
+}
+
+func proxyPorts(configPath string) ([]int, error) {
+	b, err := os.ReadFile(configPath)
+	if err != nil {
+		return nil, err
+	}
+	var cfg struct {
+		Inbounds []struct {
+			Port int `json:"port"`
+		} `json:"inbounds"`
+	}
+	if err := json.Unmarshal(b, &cfg); err != nil {
+		return nil, err
+	}
+	seen := map[int]bool{}
+	for _, inbound := range cfg.Inbounds {
+		if inbound.Port > 0 && inbound.Port <= 65535 {
+			seen[inbound.Port] = true
+		}
+	}
+	if len(seen) == 0 {
+		return nil, fmt.Errorf("no proxy ports found in %s", configPath)
+	}
+	ports := make([]int, 0, len(seen))
+	for port := range seen {
+		ports = append(ports, port)
+	}
+	sort.Ints(ports)
+	return ports, nil
 }
 
 func CheckUpdates(ctx context.Context, r command.Runner, p *output.Printer) {

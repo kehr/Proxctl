@@ -8,6 +8,7 @@ import (
 	"io"
 	"os"
 	"path/filepath"
+	"strings"
 	"time"
 )
 
@@ -53,6 +54,7 @@ func (m Manager) Backup(label string, in BackupInput) (Backup, error) {
 	if label == "" {
 		label = "manual"
 	}
+	label = sanitizeLabel(label)
 	if err := m.Ensure(); err != nil {
 		return Backup{}, err
 	}
@@ -104,6 +106,17 @@ func (m Manager) Backup(label string, in BackupInput) (Backup, error) {
 }
 
 func (m Manager) RestoreConfig(id, targetPath string) (string, error) {
+	src, err := m.ConfigBackupPath(id)
+	if err != nil {
+		return "", err
+	}
+	if err := copyFile(src, targetPath, 0600); err != nil {
+		return "", err
+	}
+	return src, nil
+}
+
+func (m Manager) ConfigBackupPath(id string) (string, error) {
 	if id == "" || id == "latest" {
 		id = "latest"
 	}
@@ -112,9 +125,6 @@ func (m Manager) RestoreConfig(id, targetPath string) (string, error) {
 		src = filepath.Join(m.StateDir, "backups", "latest", "config.json")
 	}
 	if _, err := os.Stat(src); err != nil {
-		return "", err
-	}
-	if err := copyFile(src, targetPath, 0600); err != nil {
 		return "", err
 	}
 	return src, nil
@@ -143,6 +153,7 @@ func copyFile(src, dst string, mode os.FileMode) error {
 		return err
 	}
 	tmp := dst + ".tmp"
+	defer os.Remove(tmp)
 	out, err := os.OpenFile(tmp, os.O_CREATE|os.O_TRUNC|os.O_WRONLY, mode)
 	if err != nil {
 		return err
@@ -161,6 +172,33 @@ func copyFile(src, dst string, mode os.FileMode) error {
 		return err
 	}
 	return nil
+}
+
+func sanitizeLabel(label string) string {
+	label = strings.TrimSpace(label)
+	if label == "" {
+		return "manual"
+	}
+	var b strings.Builder
+	for _, r := range label {
+		switch {
+		case r >= 'a' && r <= 'z':
+			b.WriteRune(r)
+		case r >= 'A' && r <= 'Z':
+			b.WriteRune(r)
+		case r >= '0' && r <= '9':
+			b.WriteRune(r)
+		case r == '.', r == '_', r == '-':
+			b.WriteRune(r)
+		default:
+			b.WriteByte('-')
+		}
+	}
+	out := strings.Trim(b.String(), ".-_")
+	if out == "" {
+		return "manual"
+	}
+	return out
 }
 
 func (m Manager) LockPath() string {

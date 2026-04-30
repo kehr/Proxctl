@@ -32,25 +32,50 @@ func (p Provider) WriteConfig(cfg Config) error {
 	if err != nil {
 		return err
 	}
-	if err := os.MkdirAll(filepath.Dir(p.ConfigPath), 0700); err != nil {
+	return p.WriteConfigBytes(p.ConfigPath, b)
+}
+
+func (p Provider) WriteConfigPath(cfg Config, path string) error {
+	b, err := cfg.Bytes()
+	if err != nil {
 		return err
 	}
-	tmp := p.ConfigPath + ".proxctl.tmp"
+	return p.WriteConfigBytes(path, b)
+}
+
+func (p Provider) WriteConfigBytes(path string, b []byte) error {
+	if err := os.MkdirAll(filepath.Dir(path), 0700); err != nil {
+		return err
+	}
+	tmp := path + ".proxctl.tmp"
 	if err := os.WriteFile(tmp, b, 0600); err != nil {
 		return err
 	}
+	defer os.Remove(tmp)
 	if err := os.Chmod(tmp, 0600); err != nil {
 		return err
 	}
-	return os.Rename(tmp, p.ConfigPath)
+	return os.Rename(tmp, path)
+}
+
+func (p Provider) InstallConfigFromPath(path string) error {
+	b, err := os.ReadFile(path)
+	if err != nil {
+		return err
+	}
+	return p.WriteConfigBytes(p.ConfigPath, b)
 }
 
 func (p Provider) TestConfig(ctx context.Context) error {
+	return p.TestConfigPath(ctx, p.ConfigPath)
+}
+
+func (p Provider) TestConfigPath(ctx context.Context, path string) error {
 	bin := p.Bin
 	if bin == "" {
 		bin = "xray"
 	}
-	res := p.Runner.Run(ctx, bin, "run", "-test", "-config", p.ConfigPath)
+	res := p.Runner.Run(ctx, bin, "run", "-test", "-config", path)
 	if res.Code != 0 {
 		return fmt.Errorf("%s%s", res.Stdout, res.Stderr)
 	}
@@ -109,7 +134,7 @@ func (p Provider) PortOwnedByService(ctx context.Context, port int) bool {
 	if port == 0 {
 		return false
 	}
-	res := p.Runner.Run(ctx, "ss", "-H", "-ltnp", "sport", "=", ":"+strconv.Itoa(port))
+	res := p.Runner.Run(ctx, "ss", "-H", "-ltnp")
 	if res.Code != 0 || res.Stdout == "" {
 		return false
 	}
@@ -117,7 +142,18 @@ func (p Provider) PortOwnedByService(ctx context.Context, port int) bool {
 	if service == "" {
 		service = "xray"
 	}
-	return strings.Contains(res.Stdout, service)
+	portSuffix := ":" + strconv.Itoa(port)
+	for _, line := range strings.Split(res.Stdout, "\n") {
+		fields := strings.Fields(line)
+		if len(fields) < 4 {
+			continue
+		}
+		localAddr := fields[3]
+		if strings.HasSuffix(localAddr, portSuffix) && strings.Contains(line, service) {
+			return true
+		}
+	}
+	return false
 }
 
 func (p Provider) InitDefault(ctx context.Context) error {

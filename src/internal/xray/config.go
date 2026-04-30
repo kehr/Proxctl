@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"net"
 	"net/url"
 	"strings"
 )
@@ -151,10 +152,11 @@ func (c Config) Rotate(target RotateTarget, gen Generator) (bool, RotationMeta, 
 }
 
 func (c Config) SetRealityTarget(dest string) error {
-	if !strings.Contains(dest, ":") {
+	host, _, err := net.SplitHostPort(dest)
+	if err != nil {
 		return errors.New("reality target must be host:port")
 	}
-	host := strings.Split(dest, ":")[0]
+	host = strings.Trim(host, "[]")
 	for _, ib := range c.inbounds() {
 		reality := object(object(ib["streamSettings"])["realitySettings"])
 		if len(reality) > 0 {

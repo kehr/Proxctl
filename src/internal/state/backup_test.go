@@ -24,3 +24,22 @@ func TestBackupWritesManifestAndConfig(t *testing.T) {
 		t.Fatal(err)
 	}
 }
+
+func TestBackupSanitizesLabel(t *testing.T) {
+	tmp := t.TempDir()
+	config := filepath.Join(tmp, "config.json")
+	if err := os.WriteFile(config, []byte(`{"log":{"loglevel":"warning"}}`), 0600); err != nil {
+		t.Fatal(err)
+	}
+	manager := Manager{StateDir: filepath.Join(tmp, "state")}
+	backup, err := manager.Backup("../bad label", BackupInput{ConfigPath: config})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if filepath.Dir(backup.Path) != filepath.Join(tmp, "state", "backups") {
+		t.Fatalf("backup escaped backups dir: %s", backup.Path)
+	}
+	if filepath.Base(backup.Path) == "../bad label" {
+		t.Fatalf("label was not sanitized: %s", backup.Path)
+	}
+}

@@ -1,6 +1,7 @@
 package cli
 
 import (
+	"errors"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -75,6 +76,7 @@ func newHealthCommand(rt *Runtime) *cobra.Command {
 func runHealth(cmd *cobra.Command, rt *Runtime) error {
 	p := rt.Printer()
 	prov := rt.Xray()
+	var failed []string
 	if _, err := os.Stat(prov.ConfigPath); err != nil {
 		p.Fail("Config missing: %s", prov.ConfigPath)
 		return err
@@ -82,6 +84,7 @@ func runHealth(cmd *cobra.Command, rt *Runtime) error {
 	p.Pass("Config exists: %s", prov.ConfigPath)
 	if err := prov.TestConfig(cmd.Context()); err != nil {
 		p.Fail("Xray config syntax failed: %v", err)
+		failed = append(failed, "config syntax")
 	} else {
 		p.Pass("Xray config syntax OK.")
 	}
@@ -89,6 +92,7 @@ func runHealth(cmd *cobra.Command, rt *Runtime) error {
 		p.Pass("Service is active: %s", prov.Service)
 	} else {
 		p.Fail("Service is not active: %s", prov.Service)
+		failed = append(failed, "service active")
 	}
 	ports, _ := prov.Ports()
 	for _, port := range ports {
@@ -96,7 +100,11 @@ func runHealth(cmd *cobra.Command, rt *Runtime) error {
 			p.Pass("Port %d is listened by %s.", port, prov.Service)
 		} else {
 			p.Fail("Port %d is not confirmed as %s.", port, prov.Service)
+			failed = append(failed, fmt.Sprintf("port %d", port))
 		}
+	}
+	if len(failed) > 0 {
+		return fmt.Errorf("health check failed: %s", strings.Join(failed, ", "))
 	}
 	return nil
 }
@@ -200,8 +208,18 @@ func newRestoreCommand(rt *Runtime) *cobra.Command {
 		if err := rt.Prompt().Danger("restore xray config from backup "+id, "RESTORE"); err != nil {
 			return err
 		}
-		src, err := rt.State().RestoreConfig(id, rt.Config.ConfigPath)
+		src, err := rt.State().ConfigBackupPath(id)
 		if err != nil {
+			return err
+		}
+		pending := pendingConfigPath(rt, "restore")
+		if err := copyPendingConfig(rt, src, pending); err != nil {
+			return err
+		}
+		if err := rt.Xray().TestConfigPath(cmd.Context(), pending); err != nil {
+			return err
+		}
+		if err := rt.Xray().InstallConfigFromPath(pending); err != nil {
 			return err
 		}
 		if err := rt.Xray().TestConfig(cmd.Context()); err != nil {
@@ -317,7 +335,8 @@ func newRotateCommand(rt *Runtime, apply bool) *cobra.Command {
 		if err := rt.Prompt().Danger("rotate xray "+target, "ROTATE"); err != nil {
 			return err
 		}
-		if _, err := backupXray(cmd, rt, "pre-rotate"); err != nil {
+		backup, err := backupXray(cmd, rt, "pre-rotate")
+		if err != nil {
 			return err
 		}
 		cfg, err := rt.Xray().LoadConfig()
@@ -328,17 +347,19 @@ func newRotateCommand(rt *Runtime, apply bool) *cobra.Command {
 		if err != nil {
 			return err
 		}
-		if err := rt.Xray().WriteConfig(cfg); err != nil {
-			return err
-		}
-		if err := rt.Xray().TestConfig(cmd.Context()); err != nil {
+		if err := stageTestInstallXrayConfig(cmd, rt, cfg, "rotate"); err != nil {
 			return err
 		}
 		if err := rt.Xray().Restart(cmd.Context()); err != nil {
+			_ = rollbackXray(cmd, rt, backup.ID)
 			return err
 		}
 		_ = rt.State().SaveState(meta)
-		return runHealth(cmd, rt)
+		if err := runHealth(cmd, rt); err != nil {
+			_ = rollbackXray(cmd, rt, backup.ID)
+			return err
+		}
+		return nil
 	}}
 }
 
@@ -360,7 +381,8 @@ func newSwitchCommand(rt *Runtime, apply bool) *cobra.Command {
 		if err := rt.Prompt().Danger("switch reality target to "+target, "SWITCH"); err != nil {
 			return err
 		}
-		if _, err := backupXray(cmd, rt, "pre-switch"); err != nil {
+		backup, err := backupXray(cmd, rt, "pre-switch")
+		if err != nil {
 			return err
 		}
 		cfg, err := rt.Xray().LoadConfig()
@@ -370,17 +392,56 @@ func newSwitchCommand(rt *Runtime, apply bool) *cobra.Command {
 		if err := cfg.SetRealityTarget(target); err != nil {
 			return err
 		}
-		if err := rt.Xray().WriteConfig(cfg); err != nil {
-			return err
-		}
-		if err := rt.Xray().TestConfig(cmd.Context()); err != nil {
+		if err := stageTestInstallXrayConfig(cmd, rt, cfg, "switch"); err != nil {
 			return err
 		}
 		if err := rt.Xray().Restart(cmd.Context()); err != nil {
+			_ = rollbackXray(cmd, rt, backup.ID)
 			return err
 		}
-		return runHealth(cmd, rt)
+		if err := runHealth(cmd, rt); err != nil {
+			_ = rollbackXray(cmd, rt, backup.ID)
+			return err
+		}
+		return nil
 	}}
+}
+
+func pendingConfigPath(rt *Runtime, label string) string {
+	return filepath.Join(rt.Config.StateDir, "pending", "xray-"+label+".json")
+}
+
+func copyPendingConfig(rt *Runtime, src, dst string) error {
+	b, err := os.ReadFile(src)
+	if err != nil {
+		return err
+	}
+	return rt.Xray().WriteConfigBytes(dst, b)
+}
+
+func stageTestInstallXrayConfig(cmd *cobra.Command, rt *Runtime, cfg xray.Config, label string) error {
+	pending := pendingConfigPath(rt, label)
+	if err := rt.Xray().WriteConfigPath(cfg, pending); err != nil {
+		return err
+	}
+	if err := rt.Xray().TestConfigPath(cmd.Context(), pending); err != nil {
+		return err
+	}
+	return rt.Xray().InstallConfigFromPath(pending)
+}
+
+func rollbackXray(cmd *cobra.Command, rt *Runtime, backupID string) error {
+	if backupID == "" {
+		return errors.New("missing rollback backup id")
+	}
+	src, err := rt.State().ConfigBackupPath(backupID)
+	if err != nil {
+		return err
+	}
+	if err := rt.Xray().InstallConfigFromPath(src); err != nil {
+		return err
+	}
+	return rt.Xray().Restart(cmd.Context())
 }
 
 func newSSHCommand(rt *Runtime) *cobra.Command {

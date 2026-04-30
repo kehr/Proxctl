@@ -72,3 +72,19 @@ func TestRotateAllChangesCredentialsAndKeepsPrivateKeyOutOfClient(t *testing.T) 
 		t.Fatalf("client URI leaked private key: %s", client.GenericURI())
 	}
 }
+
+func TestSetRealityTargetUsesHostPortParser(t *testing.T) {
+	cfg, err := ParseConfig([]byte(sampleConfig))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := cfg.SetRealityTarget("example.com:443"); err != nil {
+		t.Fatal(err)
+	}
+	if err := cfg.SetRealityTarget("[2001:db8::1]:443"); err != nil {
+		t.Fatal(err)
+	}
+	if err := cfg.SetRealityTarget("2001:db8::1:443"); err == nil {
+		t.Fatal("expected ambiguous IPv6 target to be rejected")
+	}
+}
