@@ -13,7 +13,7 @@ Proxctl is a production-oriented local control plane for proxy services on small
 ## Top-Level Directories
 
 - `src/cmd/proxctl`: binary entrypoint.
-- `src/internal/app`: command routing and orchestration.
+- `src/internal/cli`: Cobra/Viper command routing, config binding, completion, and docs generation.
 - `src/internal/xray`: Xray config parsing, rendering, health, init, rotate, and service integration.
 - `src/internal/client`: client profile exporters.
 - `src/internal/state`: backup, manifest, state, and restore helpers.
@@ -50,3 +50,14 @@ Providers should implement these conceptual operations:
 - rotate credentials
 - export client profile data
 
+## CLI Framework
+
+Proxctl uses Cobra for the command tree and shell completion, and Viper for default configuration, environment variable binding, and future `/etc/proxctl/defaults.yaml` loading.
+
+Configuration precedence is:
+
+```text
+command flags -> environment variables -> config file -> built-in defaults
+```
+
+Environment variables use the `PROXCTL_` prefix, for example `PROXCTL_XRAY_CONFIG_PATH`.

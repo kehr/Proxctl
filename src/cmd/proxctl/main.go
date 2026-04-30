@@ -5,12 +5,12 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/kehr/proxctl/src/internal/app"
+	"github.com/kehr/proxctl/src/internal/cli"
 )
 
 func main() {
-	a := app.New(os.Stdout, os.Stderr, os.Stdin)
-	if err := a.Run(context.Background(), os.Args[1:]); err != nil {
+	rt := cli.NewRuntime(os.Stdout, os.Stderr, os.Stdin)
+	if err := cli.Execute(context.Background(), os.Args[1:], rt); err != nil {
 		fmt.Fprintln(os.Stderr, "error:", err)
 		os.Exit(1)
 	}
