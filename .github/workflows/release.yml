@@ -48,7 +48,9 @@ jobs:
         run: go vet ./...
 
       - name: Build release archives
-        run: make dist
+        run: |
+          make dist
+          cp scripts/install.sh dist/install.sh
 
       - name: Generate release notes
         run: ./scripts/release-notes.sh "${{ steps.version.outputs.version }}" > dist/release-notes.md
@@ -68,3 +70,4 @@ jobs:
             dist/proxctl-${{ steps.version.outputs.version }}-darwin-arm64.tar.gz
             dist/proxctl-${{ steps.version.outputs.version }}-windows-amd64.zip
             dist/checksums.txt
+            dist/install.sh

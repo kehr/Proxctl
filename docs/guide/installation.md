@@ -3,7 +3,7 @@
 ## One-line install
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/kehr/Proxctl/main/scripts/install.sh | sh
+curl -fsSL https://github.com/kehr/Proxctl/releases/latest/download/install.sh | sh
 ```
 
 The installer detects the operating system and architecture, downloads the latest matching release asset, verifies `checksums.txt`, and installs `proxctl` to `/usr/local/bin`.
@@ -11,13 +11,13 @@ The installer detects the operating system and architecture, downloads the lates
 ## Install a specific version
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/kehr/Proxctl/main/scripts/install.sh | PROXCTL_VERSION=v0.2.0 sh
+curl -fsSL https://github.com/kehr/Proxctl/releases/latest/download/install.sh | PROXCTL_VERSION=v0.2.0 sh
 ```
 
 ## Change install directory
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/kehr/Proxctl/main/scripts/install.sh | PROXCTL_INSTALL_DIR="$HOME/.local/bin" sh
+curl -fsSL https://github.com/kehr/Proxctl/releases/latest/download/install.sh | PROXCTL_INSTALL_DIR="$HOME/.local/bin" sh
 ```
 
 ## Dry-run the installer

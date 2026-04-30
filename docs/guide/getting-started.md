@@ -5,7 +5,7 @@ Proxctl is a local operations CLI for proxy services on small VPS nodes. It star
 ## Install Proxctl
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/kehr/Proxctl/main/scripts/install.sh | sh
+curl -fsSL https://github.com/kehr/Proxctl/releases/latest/download/install.sh | sh
 ```
 
 Verify the binary:

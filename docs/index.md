@@ -30,7 +30,7 @@ features:
 ## Install
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/kehr/Proxctl/main/scripts/install.sh | sh
+curl -fsSL https://github.com/kehr/Proxctl/releases/latest/download/install.sh | sh
 ```
 
 ## First checks
