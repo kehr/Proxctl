@@ -19,7 +19,7 @@ func NewRootCommand(rt *Runtime) *cobra.Command {
 		Short:         "Lightweight proxy deployment and operations CLI",
 		SilenceUsage:  true,
 		SilenceErrors: true,
-		Version:       Version,
+		Version:       fmt.Sprintf("%s (commit=%s, date=%s)", Version, Commit, Date),
 		PersistentPreRunE: func(cmd *cobra.Command, args []string) error {
 			if configFile != "" {
 				viper.SetConfigFile(configFile)
@@ -57,6 +57,7 @@ func NewRootCommand(rt *Runtime) *cobra.Command {
 	_ = viper.BindPFlag("no_color", root.PersistentFlags().Lookup("no-color"))
 
 	root.AddCommand(
+		newVersionCommand(),
 		newStatusCommand(rt),
 		newAuditCommand(rt),
 		newHealthCommand(rt),

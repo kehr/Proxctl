@@ -30,9 +30,26 @@ build/                local build output
 ```bash
 make test
 make build
+make dist
 ```
 
 The binary is written to `build/proxctl`.
+
+Release archives are written to `dist/`.
+
+## GitHub Releases
+
+CI runs tests, vet, a local build, docs consistency checks, and snapshot archive uploads on `main`.
+
+Release artifact versions are managed by the root `VERSION` file. Create a release by tagging the same version:
+
+```bash
+cat VERSION
+git tag v0.2.0
+git push origin v0.2.0
+```
+
+The release workflow refuses tags that do not match `VERSION`. It builds Linux, macOS, and Windows archives plus `checksums.txt`.
 
 ## Common Usage
 

@@ -67,3 +67,20 @@ proxctl ssh harden --apply
 
 Before applying SSH hardening, keep an existing SSH session open and verify key-based login works in a second session.
 
+## Release Build
+
+Local release archives:
+
+```bash
+make dist
+```
+
+GitHub release:
+
+```bash
+cat VERSION
+git tag v0.2.0
+git push origin v0.2.0
+```
+
+The release tag must match the root `VERSION` file. Snapshot artifacts use `VERSION-dev.<shortsha>`.

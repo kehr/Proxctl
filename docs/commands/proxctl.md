@@ -36,5 +36,6 @@ Lightweight proxy deployment and operations CLI
 * [proxctl restore](proxctl_restore.md)	 - Restore Xray config from backup
 * [proxctl ssh](proxctl_ssh.md)	 - Audit and harden SSH
 * [proxctl status](proxctl_status.md)	 - Show compact node status
+* [proxctl version](proxctl_version.md)	 - Print proxctl version
 * [proxctl wizard](proxctl_wizard.md)	 - Interactive setup wizard
 

@@ -1,0 +1,81 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - "v*"
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "Version label for manual release artifacts, e.g. v0.2.0"
+        required: true
+        default: "v0.2.0"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  release:
+    name: Build and Publish Release
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Setup Go
+        uses: actions/setup-go@v6
+        with:
+          go-version-file: go.mod
+          cache-dependency-path: |
+            go.sum
+            go.mod
+
+      - name: Resolve version
+        id: version
+        shell: bash
+        run: |
+          if [[ "${GITHUB_REF_TYPE}" == "tag" ]]; then
+            version="${GITHUB_REF_NAME}"
+            ./scripts/version.sh tag-check "${version}"
+          else
+            version="${{ github.event.inputs.version }}"
+            if [[ "${version}" != "$(./scripts/version.sh release)" ]]; then
+              echo "manual release version ${version} does not match VERSION $(./scripts/version.sh release)" >&2
+              exit 1
+            fi
+          fi
+          echo "version=${version}" >> "$GITHUB_OUTPUT"
+          echo "VERSION=${version}" >> "$GITHUB_ENV"
+          echo "COMMIT=${GITHUB_SHA::12}" >> "$GITHUB_ENV"
+          echo "DATE=$(date -u +%Y-%m-%dT%H:%M:%SZ)" >> "$GITHUB_ENV"
+
+      - name: Test
+        run: go test ./...
+
+      - name: Vet
+        run: go vet ./...
+
+      - name: Build release archives
+        run: make dist
+
+      - name: Upload release assets
+        uses: softprops/action-gh-release@v3
+        with:
+          tag_name: ${{ steps.version.outputs.version }}
+          name: Proxctl ${{ steps.version.outputs.version }}
+          generate_release_notes: true
+          draft: false
+          prerelease: ${{ contains(steps.version.outputs.version, '-') }}
+          files: |
+            dist/proxctl_${{ steps.version.outputs.version }}_linux_amd64.tar.gz
+            dist/proxctl_${{ steps.version.outputs.version }}_linux_arm64.tar.gz
+            dist/proxctl_${{ steps.version.outputs.version }}_darwin_amd64.tar.gz
+            dist/proxctl_${{ steps.version.outputs.version }}_darwin_arm64.tar.gz
+            dist/proxctl_${{ steps.version.outputs.version }}_windows_amd64.zip
+            dist/checksums.txt

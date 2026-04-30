@@ -14,6 +14,12 @@ import (
 	"github.com/spf13/cobra/doc"
 )
 
+func newVersionCommand() *cobra.Command {
+	return &cobra.Command{Use: "version", Short: "Print proxctl version", Run: func(cmd *cobra.Command, args []string) {
+		fmt.Fprintf(cmd.OutOrStdout(), "proxctl %s (commit=%s, date=%s)\n", Version, Commit, Date)
+	}}
+}
+
 func newStatusCommand(rt *Runtime) *cobra.Command {
 	return &cobra.Command{Use: "status", Short: "Show compact node status", RunE: func(cmd *cobra.Command, args []string) error {
 		p := rt.Printer()

@@ -11,7 +11,11 @@ import (
 	"github.com/kehr/proxctl/src/internal/xray"
 )
 
-const Version = "0.2.0"
+var (
+	Version = "0.2.0-dev"
+	Commit  = "unknown"
+	Date    = "unknown"
+)
 
 type Runtime struct {
 	Out    io.Writer
