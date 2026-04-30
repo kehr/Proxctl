@@ -83,7 +83,7 @@ func AuditSSH(ctx context.Context, r command.Runner, p *output.Printer) {
 
 func PlanSSHHarden(ctx context.Context, r command.Runner, p *output.Printer) {
 	AuditSSH(ctx, r, p)
-	p.Info("Plan: write /etc/ssh/sshd_config.d/90-proxctl-hardening.conf")
+	p.Info("Plan: write /etc/ssh/sshd_config.d/00-proxctl-hardening.conf")
 	p.Info("Plan: run sshd -t, reload sshd, require a new SSH session confirmation")
 }
 
@@ -92,9 +92,10 @@ func ApplySSHHarden(ctx context.Context, r command.Runner) error {
 	if err := os.MkdirAll("/etc/ssh/sshd_config.d", 0700); err != nil {
 		return err
 	}
-	if err := os.WriteFile("/etc/ssh/sshd_config.d/90-proxctl-hardening.conf", []byte(content), 0600); err != nil {
+	if err := os.WriteFile("/etc/ssh/sshd_config.d/00-proxctl-hardening.conf", []byte(content), 0600); err != nil {
 		return err
 	}
+	_ = os.Remove("/etc/ssh/sshd_config.d/90-proxctl-hardening.conf")
 	if res := r.Run(ctx, "sshd", "-t"); res.Code != 0 {
 		return fmt.Errorf("sshd -t failed: %s", res.Stderr)
 	}
