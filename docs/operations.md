@@ -2,6 +2,12 @@
 
 ## Adopt Existing Xray
 
+Install Proxctl:
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/kehr/Proxctl/main/install.sh | sh
+```
+
 ```bash
 proxctl adopt xray
 ```

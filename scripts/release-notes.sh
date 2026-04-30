@@ -46,6 +46,12 @@ cat <<EOF
 
 ## Install
 
+One-line installer:
+
+\`\`\`bash
+curl -fsSL https://raw.githubusercontent.com/kehr/Proxctl/main/install.sh | sh
+\`\`\`
+
 Linux amd64:
 
 \`\`\`bash

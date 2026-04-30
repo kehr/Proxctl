@@ -16,6 +16,18 @@ The first supported provider is Xray. The project is designed to expand to other
 
 ## Install
 
+One-line installer:
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/kehr/Proxctl/main/install.sh | sh
+```
+
+Install a specific version:
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/kehr/Proxctl/main/install.sh | PROXCTL_VERSION=v0.2.0 sh
+```
+
 Download the archive for your platform from GitHub Releases, then install the binary:
 
 ```bash
