@@ -1,89 +1,64 @@
 # Proxctl
 
-Proxctl is a lightweight proxy service deployment and operations CLI built with Cobra and Viper.
+Proxctl is a lightweight CLI for deploying and operating proxy services on small VPS nodes.
 
-The first provider is Xray, with production-oriented workflows for single-purpose VPS nodes:
+The first supported provider is Xray. The project is designed to expand to other proxy backends over time.
 
-- install/init/adopt lifecycle
-- read-only status, audit, health, and doctor checks
-- transactional backup and restore
-- credential rotation plans and apply flows
-- Reality target switching
-- client export for Shadowrocket, Surge, Mihomo/Stash, sing-box, v2rayN, and v2rayNG
+## Features
+
+- Xray install/init/adopt lifecycle
+- Status, audit, health, and doctor checks
+- Backup, restore, and safer change workflows
+- Credential rotation and Reality target switching
+- Client config export for Shadowrocket, Surge, Mihomo/Stash, sing-box, v2rayN, and v2rayNG
 - SSH and firewall hardening plans
-- boot health checks
-- shell completion and generated command documentation
+- Shell completion and generated command reference
 
-## Layout
+## Install
 
-```text
-src/cmd/proxctl/       CLI entrypoint
-src/internal/          private implementation packages
-configs/              default configuration examples
-docs/                 operator and architecture docs
-scripts/              build and deployment helpers
-build/                local build output
-```
-
-## Build
+Download the archive for your platform from GitHub Releases, then install the binary:
 
 ```bash
-make test
-make build
-make dist
+tar -xzf proxctl-v0.2.0-linux-amd64.tar.gz
+sudo install -m 0755 proxctl-v0.2.0-linux-amd64/proxctl /usr/local/bin/proxctl
 ```
 
-The binary is written to `build/proxctl`.
-
-Release archives are written to `dist/`.
-
-## GitHub Releases
-
-CI runs tests, vet, a local build, docs consistency checks, and snapshot archive uploads on `main`.
-
-Release artifact versions are managed by the root `VERSION` file. Snapshot artifacts use stable `proxctl-snapshot-<os>-<arch>` names; release artifacts use `proxctl-<version>-<os>-<arch>` names.
-
-Create a release by tagging the same version:
+Verify:
 
 ```bash
-cat VERSION
-git tag v0.2.0
-git push origin v0.2.0
+proxctl version
 ```
 
-The release workflow refuses tags that do not match `VERSION`. It builds Linux, macOS, and Windows archives plus `checksums.txt`.
+## Quick Start
 
-## Common Usage
+Adopt an existing Xray installation:
 
 ```bash
-proxctl status
-proxctl audit --skip-updates
-proxctl health
-proxctl config summary
-proxctl adopt xray
-proxctl backup baseline
-proxctl client export shadowrocket --provider xray --server <ip-or-domain> --public-key <reality-public-key>
-proxctl plan rotate xray all
-proxctl apply rotate xray all
-proxctl ssh harden --plan
-proxctl firewall enable --plan
-proxctl completion zsh
-proxctl docs docs/commands
+sudo proxctl adopt xray
+sudo proxctl health
+sudo proxctl audit --skip-updates
 ```
 
-High-risk actions require an explicit confirmation token even when `--yes` is set.
+Export a client profile:
 
-## State
-
-Default production paths:
-
-```text
-/usr/local/bin/proxctl
-/etc/proxctl/defaults.yaml
-/var/lib/proxctl/
-/var/lib/proxctl/backups/
+```bash
+proxctl client export shadowrocket \
+  --provider xray \
+  --server <ip-or-domain> \
+  --public-key <reality-public-key> \
+  --name my-node
 ```
 
-## Provider Roadmap
+Review high-risk changes before applying:
 
-The provider boundary is designed so Xray is only the first backend. Future providers can add sing-box, Hysteria, TUIC, or other proxy services without changing the CLI lifecycle model.
+```bash
+sudo proxctl plan rotate xray all
+sudo proxctl apply rotate xray all
+```
+
+## Documentation
+
+- [Operations guide](docs/operations.md)
+- [Architecture](docs/architecture.md)
+- [Development guide](docs/development.md)
+- [Command reference](docs/commands/proxctl.md)

@@ -1,0 +1,90 @@
+# Development Guide
+
+## Project Layout
+
+```text
+src/cmd/proxctl/       CLI entrypoint
+src/internal/cli/      Cobra/Viper command layer
+src/internal/xray/     Xray provider
+src/internal/client/   Client exporters
+src/internal/state/    Backup, manifest, state, restore
+src/internal/system/   OS, SSH, firewall, update checks
+configs/              Default configuration examples
+deployments/          systemd templates
+docs/                 User, architecture, command, and development docs
+scripts/              Build and deployment helpers
+```
+
+## Build and Test
+
+```bash
+make test
+make vet
+make build
+```
+
+The local binary is written to:
+
+```text
+build/proxctl
+```
+
+## Release Artifacts
+
+Snapshot archives:
+
+```bash
+make snapshot
+```
+
+Release archives:
+
+```bash
+make dist
+```
+
+Artifact naming:
+
+```text
+proxctl-snapshot-linux-amd64.tar.gz
+proxctl-v0.2.0-linux-amd64.tar.gz
+```
+
+Release versions are managed by the root `VERSION` file. Release tags must match it.
+
+## GitHub Actions
+
+CI runs on push and pull requests:
+
+- `go test ./...`
+- `go vet ./...`
+- local build
+- smoke tests
+- command documentation consistency check
+- snapshot artifact upload on `main`
+
+Release builds run on `v*` tags and upload:
+
+- Linux amd64/arm64
+- macOS amd64/arm64
+- Windows amd64
+- `checksums.txt`
+
+Create a release:
+
+```bash
+cat VERSION
+git tag v0.2.0
+git push origin v0.2.0
+```
+
+## Command Documentation
+
+Regenerate command docs after CLI changes:
+
+```bash
+make build
+./build/proxctl docs docs/commands
+```
+
+CI checks that generated docs are committed.
