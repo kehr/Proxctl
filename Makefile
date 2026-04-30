@@ -7,7 +7,7 @@ COMMIT ?= $(shell git rev-parse --short HEAD 2>/dev/null || echo unknown)
 DATE ?= $(shell date -u +%Y-%m-%dT%H:%M:%SZ)
 LDFLAGS := -s -w -X github.com/kehr/proxctl/src/internal/cli.Version=$(VERSION) -X github.com/kehr/proxctl/src/internal/cli.Commit=$(COMMIT) -X github.com/kehr/proxctl/src/internal/cli.Date=$(DATE)
 
-.PHONY: all test vet build clean install linux-amd64 snapshot dist
+.PHONY: all test vet build clean install linux-amd64 snapshot dist docs docs-site verify release release-dry-run
 
 all: test build
 
@@ -30,6 +30,25 @@ snapshot:
 
 dist:
 	VERSION="$$(./scripts/version.sh release)" ./scripts/build-matrix.sh release
+
+docs:
+	$(BUILD_DIR)/$(BINARY) docs docs/commands
+	git diff --exit-code docs/commands
+
+docs-site:
+	npm --prefix docs ci
+	npm --prefix docs run build
+	npm --prefix docs audit --omit=dev
+
+verify: test vet build dist docs docs-site
+	sh -n scripts/*.sh
+	PROXCTL_DRY_RUN=1 ./scripts/install.sh
+
+release:
+	./scripts/release.sh
+
+release-dry-run:
+	DRY_RUN=1 ./scripts/release.sh
 
 install: build
 	install -m 0755 $(BUILD_DIR)/$(BINARY) /usr/local/bin/$(BINARY)

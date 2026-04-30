@@ -4,13 +4,24 @@ Release versions are managed by the root `VERSION` file.
 
 ## Create a release
 
+Preferred local workflow:
+
 ```bash
-cat VERSION
-git tag v0.2.0
-git push origin v0.2.0
+make release-dry-run
+make release
 ```
 
-The release workflow refuses tags that do not match `VERSION`.
+`make release` defaults to `BUMP=patch`. It updates `VERSION`, runs the full local verification suite, commits the version bump, creates an annotated tag, and pushes `main` plus the tag.
+
+Other version bumps:
+
+```bash
+make release BUMP=minor
+make release BUMP=major
+make release RELEASE_VERSION=v1.2.3
+```
+
+The GitHub release workflow only runs after a `v*` tag is pushed. It refuses tags that do not match `VERSION`.
 
 ## Release workflow
 
