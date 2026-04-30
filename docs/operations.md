@@ -83,4 +83,4 @@ git tag v0.2.0
 git push origin v0.2.0
 ```
 
-The release tag must match the root `VERSION` file. Snapshot artifacts use `VERSION-dev.<shortsha>`.
+The release tag must match the root `VERSION` file. Snapshot artifact filenames use `snapshot` instead of a commit hash; the binary still embeds commit/date metadata for troubleshooting.

@@ -41,7 +41,9 @@ Release archives are written to `dist/`.
 
 CI runs tests, vet, a local build, docs consistency checks, and snapshot archive uploads on `main`.
 
-Release artifact versions are managed by the root `VERSION` file. Create a release by tagging the same version:
+Release artifact versions are managed by the root `VERSION` file. Snapshot artifacts use stable `proxctl_snapshot_<os>_<arch>` names; release artifacts use `proxctl_<version>_<os>_<arch>` names.
+
+Create a release by tagging the same version:
 
 ```bash
 cat VERSION
