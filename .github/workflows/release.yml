@@ -50,12 +50,15 @@ jobs:
       - name: Build release archives
         run: make dist
 
+      - name: Generate release notes
+        run: ./scripts/release-notes.sh "${{ steps.version.outputs.version }}" > dist/release-notes.md
+
       - name: Upload release assets
         uses: softprops/action-gh-release@v3
         with:
           tag_name: ${{ steps.version.outputs.version }}
           name: Proxctl ${{ steps.version.outputs.version }}
-          generate_release_notes: true
+          body_path: dist/release-notes.md
           draft: false
           prerelease: ${{ contains(steps.version.outputs.version, '-') }}
           files: |
