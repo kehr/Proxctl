@@ -40,7 +40,7 @@ After rotation, export updated client configs:
 ```bash
 proxctl client export shadowrocket \
   --provider xray \
-  --server <ip-or-domain> \
-  --public-key <new-reality-public-key> \
   --name my-node
 ```
+
+Pass `--server <domain>` if clients should use a domain instead of the auto-detected public IP.

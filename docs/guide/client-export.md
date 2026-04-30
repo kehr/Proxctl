@@ -21,21 +21,27 @@ Current formats:
 
 ## Shadowrocket
 
+On a VPS, `proxctl` can read the local Xray config, derive the Reality public key from `privateKey`, and auto-detect the public server IP:
+
+```bash
+proxctl client export shadowrocket --name my-node
+```
+
+Use `--server` when clients should connect through a domain name instead of the detected public IP:
+
 ```bash
 proxctl client export shadowrocket \
   --provider xray \
   --server <ip-or-domain> \
-  --public-key <reality-public-key> \
   --name my-node
 ```
+
+Use `--public-key` only when the local config is unavailable or you want to override the derived key.
 
 ## Surge
 
 ```bash
 proxctl client export surge \
-  --provider xray \
-  --server <ip-or-domain> \
-  --public-key <reality-public-key> \
   --name my-node
 ```
 
@@ -43,9 +49,6 @@ proxctl client export surge \
 
 ```bash
 proxctl client export mihomo \
-  --provider xray \
-  --server <ip-or-domain> \
-  --public-key <reality-public-key> \
   --name my-node
 ```
 

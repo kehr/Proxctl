@@ -1,11 +1,15 @@
 package cli
 
 import (
+	"context"
 	"errors"
 	"fmt"
+	"io"
+	"net/http"
 	"os"
 	"path/filepath"
 	"strings"
+	"time"
 
 	"github.com/kehr/proxctl/src/internal/client"
 	"github.com/kehr/proxctl/src/internal/state"
@@ -14,6 +18,11 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/spf13/cobra/doc"
 )
+
+var publicIPURLs = []string{
+	"https://api.ipify.org",
+	"https://ifconfig.me/ip",
+}
 
 func newVersionCommand() *cobra.Command {
 	return &cobra.Command{Use: "version", Short: "Print proxctl version", Run: func(cmd *cobra.Command, args []string) {
@@ -147,12 +156,25 @@ func newClientCommand(rt *Runtime) *cobra.Command {
 		if err := requireProvider(provider); err != nil {
 			return err
 		}
-		if server == "" {
-			return fmt.Errorf("--server is required")
-		}
 		cfg, err := rt.Xray().LoadConfig()
 		if err != nil {
 			return err
+		}
+		if server == "" {
+			server, err = detectPublicIP(cmd.Context())
+			if err != nil {
+				return fmt.Errorf("--server is required (auto-detect public IP failed: %w)", err)
+			}
+		}
+		if pub == "" {
+			privateKey := cfg.RealityPrivateKey()
+			if privateKey == "" {
+				return fmt.Errorf("--public-key is required (no Reality privateKey found in Xray config)")
+			}
+			pub, err = xray.RealityPublicKey(cmd.Context(), rt.Runner, rt.Config.XrayBin, privateKey)
+			if err != nil {
+				return fmt.Errorf("--public-key is required (auto-derive from Reality privateKey failed: %w)", err)
+			}
 		}
 		profile, err := cfg.ClientProfile(server, pub, name)
 		if err != nil {
@@ -166,11 +188,51 @@ func newClientCommand(rt *Runtime) *cobra.Command {
 		return nil
 	}}
 	export.Flags().StringVar(&provider, "provider", "xray", "provider")
-	export.Flags().StringVar(&server, "server", "", "server address")
-	export.Flags().StringVar(&pub, "public-key", "", "Reality public key")
+	export.Flags().StringVar(&server, "server", "", "server address; auto-detects public IP when omitted")
+	export.Flags().StringVar(&pub, "public-key", "", "Reality public key; derives from config privateKey when omitted")
 	export.Flags().StringVar(&name, "name", "proxctl-node", "profile name")
 	root.AddCommand(export)
 	return root
+}
+
+func detectPublicIP(ctx context.Context) (string, error) {
+	client := http.Client{Timeout: 5 * time.Second}
+	var lastErr error
+	for _, url := range publicIPURLs {
+		req, err := http.NewRequestWithContext(ctx, http.MethodGet, url, nil)
+		if err != nil {
+			lastErr = err
+			continue
+		}
+		res, err := client.Do(req)
+		if err != nil {
+			lastErr = err
+			continue
+		}
+		body, readErr := io.ReadAll(io.LimitReader(res.Body, 128))
+		closeErr := res.Body.Close()
+		if readErr != nil {
+			lastErr = readErr
+			continue
+		}
+		if closeErr != nil {
+			lastErr = closeErr
+			continue
+		}
+		if res.StatusCode < 200 || res.StatusCode >= 300 {
+			lastErr = fmt.Errorf("%s returned %s", url, res.Status)
+			continue
+		}
+		ip := strings.TrimSpace(string(body))
+		if ip != "" {
+			return ip, nil
+		}
+		lastErr = fmt.Errorf("%s returned empty response", url)
+	}
+	if lastErr != nil {
+		return "", lastErr
+	}
+	return "", fmt.Errorf("no public IP services configured")
 }
 
 func newBackupCommand(rt *Runtime) *cobra.Command {

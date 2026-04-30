@@ -11,11 +11,12 @@ import (
 
 type fakeRunner struct {
 	stdout string
+	stderr string
 	code   int
 }
 
 func (r fakeRunner) Run(ctx context.Context, name string, args ...string) command.Result {
-	return command.Result{Stdout: r.stdout, Code: r.code}
+	return command.Result{Stdout: r.stdout, Stderr: r.stderr, Code: r.code}
 }
 
 func (r fakeRunner) LookPath(name string) bool { return true }
@@ -63,5 +64,16 @@ LISTEN 0 4096 [::]:443 [::]:* users:(("xray",pid=2,fd=3))`
 	}
 	if provider.PortOwnedByService(context.Background(), 22) {
 		t.Fatal("did not expect xray to own 22")
+	}
+}
+
+func TestRealityPublicKeyDerivesFromPrivateKey(t *testing.T) {
+	runner := fakeRunner{stdout: "private key: server-private-key\npublic key: derived-public-key\n"}
+	pub, err := RealityPublicKey(context.Background(), runner, "xray", "server-private-key")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if pub != "derived-public-key" {
+		t.Fatalf("unexpected public key: %s", pub)
 	}
 }

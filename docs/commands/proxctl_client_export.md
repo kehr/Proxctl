@@ -12,8 +12,8 @@ proxctl client export <format> [flags]
   -h, --help                help for export
       --name string         profile name (default "proxctl-node")
       --provider string     provider (default "xray")
-      --public-key string   Reality public key
-      --server string       server address
+      --public-key string   Reality public key; derives from config privateKey when omitted
+      --server string       server address; auto-detects public IP when omitted
 ```
 
 ### Options inherited from parent commands

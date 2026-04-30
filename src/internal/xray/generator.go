@@ -51,18 +51,51 @@ func (g SystemGenerator) RealityKeyPair() (string, string, error) {
 	}
 	var priv, pub string
 	for _, line := range strings.Split(res.Stdout, "\n") {
-		line = strings.TrimSpace(line)
-		if strings.HasPrefix(strings.ToLower(line), "private key:") {
-			priv = strings.TrimSpace(strings.TrimPrefix(line, "Private key:"))
-		}
-		if strings.HasPrefix(strings.ToLower(line), "public key:") {
-			pub = strings.TrimSpace(strings.TrimPrefix(line, "Public key:"))
-		}
+		priv = firstNonEmpty(priv, valueAfterLabel(line, "private key:"))
+		pub = firstNonEmpty(pub, valueAfterLabel(line, "public key:"))
 	}
 	if priv == "" || pub == "" {
 		return "", "", fmt.Errorf("could not parse x25519 output")
 	}
 	return priv, pub, nil
+}
+
+func RealityPublicKey(ctx context.Context, runner command.Runner, xrayBin, privateKey string) (string, error) {
+	if strings.TrimSpace(privateKey) == "" {
+		return "", fmt.Errorf("reality private key is required")
+	}
+	if runner == nil {
+		return "", fmt.Errorf("xray x25519 is required to derive reality public key")
+	}
+	bin := xrayBin
+	if bin == "" {
+		bin = "xray"
+	}
+	res := runner.Run(ctx, bin, "x25519", "-i", privateKey)
+	if res.Code != 0 {
+		return "", fmt.Errorf("xray x25519 failed: %s", res.Stderr)
+	}
+	for _, line := range strings.Split(res.Stdout, "\n") {
+		if pub := valueAfterLabel(line, "public key:"); pub != "" {
+			return pub, nil
+		}
+	}
+	return "", fmt.Errorf("could not parse x25519 public key output")
+}
+
+func valueAfterLabel(line, label string) string {
+	line = strings.TrimSpace(line)
+	if !strings.HasPrefix(strings.ToLower(line), label) {
+		return ""
+	}
+	return strings.TrimSpace(line[len(label):])
+}
+
+func firstNonEmpty(current, next string) string {
+	if current != "" {
+		return current
+	}
+	return next
 }
 
 func randomUUID() (string, error) {

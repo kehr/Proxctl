@@ -49,9 +49,6 @@ Use `--skip-updates` on low-resource nodes when you want to avoid package metada
 
 ```bash
 proxctl client export shadowrocket \
-  --provider xray \
-  --server <ip-or-domain> \
-  --public-key <reality-public-key> \
   --name my-node
 ```
 

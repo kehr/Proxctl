@@ -47,8 +47,5 @@ sudo proxctl audit --skip-updates
 
 ```bash
 proxctl client export shadowrocket \
-  --provider xray \
-  --server <ip-or-domain> \
-  --public-key <reality-public-key> \
   --name my-node
 ```

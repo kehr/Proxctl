@@ -106,6 +106,16 @@ func (c Config) ClientProfile(server, publicKey, name string) (ClientProfile, er
 	}, nil
 }
 
+func (c Config) RealityPrivateKey() string {
+	for _, ib := range c.inbounds() {
+		reality := object(object(ib["streamSettings"])["realitySettings"])
+		if privateKey := stringValue(reality["privateKey"]); privateKey != "" {
+			return privateKey
+		}
+	}
+	return ""
+}
+
 func (c Config) Rotate(target RotateTarget, gen Generator) (bool, RotationMeta, error) {
 	switch target {
 	case RotateUUID, RotateShortID, RotateRealityKey, RotateAll:
