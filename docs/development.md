@@ -96,10 +96,10 @@ CI checks that generated docs are committed.
 
 ## Installer
 
-The root `install.sh` script detects OS/architecture, resolves the latest GitHub release, downloads the matching archive, verifies `checksums.txt`, and installs `proxctl`.
+The `scripts/install.sh` script detects OS/architecture, resolves the latest GitHub release, downloads the matching archive, verifies `checksums.txt`, and installs `proxctl`.
 
 Dry-run locally:
 
 ```bash
-PROXCTL_DRY_RUN=1 ./install.sh
+PROXCTL_DRY_RUN=1 ./scripts/install.sh
 ```

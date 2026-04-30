@@ -49,7 +49,7 @@ cat <<EOF
 One-line installer:
 
 \`\`\`bash
-curl -fsSL https://raw.githubusercontent.com/kehr/Proxctl/main/install.sh | sh
+curl -fsSL https://raw.githubusercontent.com/kehr/Proxctl/main/scripts/install.sh | sh
 \`\`\`
 
 Linux amd64:
